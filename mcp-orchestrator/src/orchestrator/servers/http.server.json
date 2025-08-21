@@ -1,0 +1,13 @@
+{
+  "name": "http",
+  "type": "mcp-server",
+  "scopes": [
+    "http:get"
+  ],
+  "config": {
+    "allowed_hosts": [
+      "*"
+    ],
+    "timeout_ms": 20000
+  }
+}

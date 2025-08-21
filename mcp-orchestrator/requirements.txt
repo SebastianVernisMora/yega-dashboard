@@ -1,0 +1,8 @@
+
+# Requisitos mínimos (ajusta según tu entorno)
+# langgraph y mcp adapters pueden instalarse si se usan en producción.
+# langgraph
+# langchain
+# mcp-adapters
+# pydantic
+# uvicorn / fastapi (si expones endpoints)

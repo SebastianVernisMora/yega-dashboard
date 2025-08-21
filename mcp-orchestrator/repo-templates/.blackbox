@@ -1,0 +1,8 @@
+
+# .blackbox — Protocolo 911
+
+- Contexto mínimo: rama, PR/issue, error/log.
+- Objetivo: resolver bloqueo puntual (no refactor general).
+- Entradas: `logs/*.txt`, `diff.patch`, `tests-report.xml`.
+- Salidas: propuesta concreta (patch o pasos).
+- Límite: 1 iteración de 30–60 min; si persiste, escalar a Gemini.

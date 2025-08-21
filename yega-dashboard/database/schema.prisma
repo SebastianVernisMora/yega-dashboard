@@ -1,0 +1,98 @@
+// Schema Prisma para el Dashboard Yega
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Repository {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(255)
+  owner       String   @db.VarChar(255)
+  full_name   String   @unique @db.VarChar(512)
+  description String?  @db.Text
+  language    String?  @db.VarChar(100)
+  stars       Int      @default(0)
+  forks       Int      @default(0)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  
+  // Relaciones
+  issues        Issue[]
+  pull_requests PullRequest[]
+  commits       Commit[]
+  readme_content ReadmeContent?
+  
+  @@map("repositories")
+}
+
+model Issue {
+  id         Int      @id @default(autoincrement())
+  repo_id    Int
+  number     Int
+  title      String   @db.VarChar(512)
+  state      String   @db.VarChar(50)
+  body       String?  @db.LongText
+  author     String   @db.VarChar(255)
+  labels     String?  @db.Text // JSON string
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  
+  // Relación con Repository
+  repository Repository @relation(fields: [repo_id], references: [id], onDelete: Cascade)
+  
+  @@unique([repo_id, number])
+  @@map("issues")
+}
+
+model PullRequest {
+  id         Int       @id @default(autoincrement())
+  repo_id    Int
+  number     Int
+  title      String    @db.VarChar(512)
+  state      String    @db.VarChar(50)
+  body       String?   @db.LongText
+  author     String    @db.VarChar(255)
+  merged_at  DateTime?
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  
+  // Relación con Repository
+  repository Repository @relation(fields: [repo_id], references: [id], onDelete: Cascade)
+  
+  @@unique([repo_id, number])
+  @@map("pull_requests")
+}
+
+model Commit {
+  id         Int      @id @default(autoincrement())
+  repo_id    Int
+  sha        String   @unique @db.VarChar(40)
+  message    String   @db.Text
+  author     String   @db.VarChar(255)
+  date       DateTime
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  
+  // Relación con Repository
+  repository Repository @relation(fields: [repo_id], references: [id], onDelete: Cascade)
+  
+  @@map("commits")
+}
+
+model ReadmeContent {
+  id           Int      @id @default(autoincrement())
+  repo_id      Int      @unique
+  content      String   @db.LongText
+  last_updated DateTime @default(now())
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+  
+  // Relación con Repository
+  repository Repository @relation(fields: [repo_id], references: [id], onDelete: Cascade)
+  
+  @@map("readme_content")
+}

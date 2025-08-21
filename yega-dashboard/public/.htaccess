@@ -1,0 +1,53 @@
+# Configuración Apache para APIs del dashboard
+
+# Habilitar reescritura de URLs
+RewriteEngine On
+
+# Headers CORS para todas las respuestas
+Header always set Access-Control-Allow-Origin "*"
+Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+Header always set Access-Control-Allow-Headers "Content-Type, Authorization"
+Header always set Access-Control-Max-Age "86400"
+
+# Rutas de API
+# /api/repositories -> repositories.php
+RewriteRule ^api/repositories/?$ api/repositories.php [L,QSA]
+
+# /api/repository/{name}/issues -> repository/issues.php
+RewriteRule ^api/repository/([^/]+)/issues/?$ api/repository/issues.php/$1 [L,QSA]
+
+# /api/repository/{name}/pulls -> repository/pulls.php
+RewriteRule ^api/repository/([^/]+)/pulls/?$ api/repository/pulls.php/$1 [L,QSA]
+
+# /api/repository/{name}/readme -> repository/readme.php
+RewriteRule ^api/repository/([^/]+)/readme/?$ api/repository/readme.php/$1 [L,QSA]
+
+# /api/stats/overview -> stats/overview.php
+RewriteRule ^api/stats/overview/?$ api/stats/overview.php [L,QSA]
+
+# /api/stats/activity -> stats/activity.php
+RewriteRule ^api/stats/activity/?$ api/stats/activity.php [L,QSA]
+
+# /api/sync -> sync.php
+RewriteRule ^api/sync/?$ api/sync.php [L,QSA]
+
+# Manejar OPTIONS requests para CORS
+RewriteCond %{REQUEST_METHOD} OPTIONS
+RewriteRule ^(.*)$ $1 [R=200,L]
+
+# Configuraciones de seguridad
+<Files "*.php">
+    Order allow,deny
+    Allow from all
+</Files>
+
+# Ocultar archivos sensibles
+<Files ".env">
+    Order allow,deny
+    Deny from all
+</Files>
+
+<Files "config.php">
+    Order allow,deny
+    Deny from all
+</Files>

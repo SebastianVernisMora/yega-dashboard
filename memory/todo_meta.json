@@ -1,0 +1,55 @@
+{
+  "todos": {
+    "Coordinator": {
+      "1": {
+        "id": "1",
+        "content": "Analizar requerimientos y limitaciones técnicas",
+        "details": "Confirmar con el usuario la tecnología de backend preferida (Supabase vs PHP) y obtener detalles específicos sobre los repositorios a analizar",
+        "status": "completed",
+        "priority": "high"
+      },
+      "2": {
+        "id": "2",
+        "content": "Diseñar arquitectura del dashboard",
+        "details": "Diseñar schema MySQL con Prisma para almacenar datos de los 5 repositorios Yega (Ecosistema, API, Tienda, Repartidor, Cliente). Planificar dashboard con vistas específicas para cada componente del ecosistema",
+        "status": "completed",
+        "priority": "high"
+      },
+      "3": {
+        "id": "3",
+        "content": "Configurar integración con GitHub API",
+        "details": "Configurar GitHub API para obtener datos de: SebastianVernisMora/Yega-Ecosistema, SebastianVernisMora/Yega-API, SebastianVernisMora/Yega-Tienda, SebastianVernisMora/Yega-Repartidor, SebastianVernisMora/Yega-Cliente",
+        "status": "completed",
+        "priority": "high"
+      },
+      "4": {
+        "id": "4",
+        "content": "Desarrollar backend y base de datos",
+        "details": "Crear backend PHP con Prisma ORM, MySQL, APIs REST para sincronización con GitHub y endpoints para frontend",
+        "status": "completed",
+        "priority": "high"
+      },
+      "5": {
+        "id": "5",
+        "content": "Desarrollar frontend interactivo",
+        "details": "Desarrollar frontend JavaScript/HTML con visualizaciones específicas para el ecosistema Yega, comparación entre componentes",
+        "status": "completed",
+        "priority": "high"
+      },
+      "6": {
+        "id": "6",
+        "content": "Implementar funcionalidades avanzadas",
+        "details": "Implementar dashboard avanzado con métricas específicas del ecosistema, timeline de desarrollo, análisis de dependencias entre repos",
+        "status": "completed",
+        "priority": "medium"
+      },
+      "7": {
+        "id": "7",
+        "content": "Testing y optimización",
+        "details": "Crear documentación completa de instalación local: PHP, MySQL, Prisma, configuración GitHub API",
+        "status": "completed",
+        "priority": "medium"
+      }
+    }
+  }
+}

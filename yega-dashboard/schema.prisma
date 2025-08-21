@@ -1,0 +1,93 @@
+// Prisma Schema para Dashboard Yega
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Repository {
+  id          Int      @id @default(autoincrement())
+  name        String
+  owner       String
+  fullName    String   @unique @map("full_name")
+  description String?  @db.Text
+  language    String?
+  stars       Int      @default(0)
+  forks       Int      @default(0)
+  openIssues  Int      @default(0) @map("open_issues")
+  createdAt   DateTime @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  
+  issues       Issue[]
+  pullRequests PullRequest[]
+  commits      Commit[]
+  readme       ReadmeContent?
+  
+  @@map("repositories")
+}
+
+model Issue {
+  id           Int      @id @default(autoincrement())
+  repositoryId Int      @map("repository_id")
+  number       Int
+  title        String   @db.Text
+  state        String   // open, closed
+  body         String?  @db.LongText
+  author       String
+  labels       String?  @db.Text // JSON string of labels
+  createdAt    DateTime @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  closedAt     DateTime? @map("closed_at")
+  
+  repository Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  
+  @@unique([repositoryId, number])
+  @@map("issues")
+}
+
+model PullRequest {
+  id           Int      @id @default(autoincrement())
+  repositoryId Int      @map("repository_id")
+  number       Int
+  title        String   @db.Text
+  state        String   // open, closed, merged
+  body         String?  @db.LongText
+  author       String
+  createdAt    DateTime @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  mergedAt     DateTime? @map("merged_at")
+  closedAt     DateTime? @map("closed_at")
+  
+  repository Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  
+  @@unique([repositoryId, number])
+  @@map("pull_requests")
+}
+
+model Commit {
+  id           Int      @id @default(autoincrement())
+  repositoryId Int      @map("repository_id")
+  sha          String   @unique
+  message      String   @db.Text
+  author       String
+  date         DateTime
+  createdAt    DateTime @default(now()) @map("created_at")
+  
+  repository Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  
+  @@map("commits")
+}
+
+model ReadmeContent {
+  id           Int      @id @default(autoincrement())
+  repositoryId Int      @unique @map("repository_id")
+  content      String   @db.LongText
+  lastUpdated  DateTime @updatedAt @map("last_updated")
+  
+  repository Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  
+  @@map("readme_content")
+}

@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Ecosistema Yega</title>
+    <meta name="description" content="Dashboard completo para monitoreo del ecosistema Yega">
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+    
+    <!-- Estilos CSS -->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/components.css">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Marked.js para renderizado Markdown -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <!-- Highlight.js para syntax highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+</head>
+<body class="dark-theme">
+    <!-- Header -->
+    <header class="header">
+        <div class="header-container">
+            <div class="logo">
+                <i class="fab fa-github"></i>
+                <h1>Dashboard Yega</h1>
+            </div>
+            
+            <div class="header-controls">
+                <div class="sync-status" id="syncStatus">
+                    <i class="fas fa-circle"></i>
+                    <span>Conectado</span>
+                </div>
+                
+                <button class="btn btn-secondary sync-btn" id="syncBtn">
+                    <i class="fas fa-sync-alt"></i>
+                    <span>Sincronizar</span>
+                </button>
+                
+                <button class="btn btn-secondary theme-toggle" id="themeToggle">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs">
+        <div class="nav-container">
+            <button class="nav-tab active" data-tab="overview">
+                <i class="fas fa-chart-line"></i>
+                <span>Overview</span>
+            </button>
+            <button class="nav-tab" data-tab="repositories">
+                <i class="fas fa-folder-open"></i>
+                <span>Repositorios</span>
+            </button>
+            <button class="nav-tab" data-tab="analytics">
+                <i class="fas fa-chart-bar"></i>
+                <span>Analytics</span>
+            </button>
+            <button class="nav-tab" data-tab="timeline">
+                <i class="fas fa-clock"></i>
+                <span>Timeline</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Overview Tab -->
+        <section class="tab-content active" id="overview-tab">
+            <div class="overview-header">
+                <h2>Ecosistema Yega - Overview</h2>
+                <p>Monitoreo integral de los 5 repositorios principales del ecosistema</p>
+                <div class="last-update">
+                    <i class="fas fa-clock"></i>
+                    <span>Última actualización: <span id="lastUpdate">--</span></span>
+                </div>
+            </div>
+            
+            <!-- Stats Cards -->
+            <div class="stats-grid">
+                <div class="stat-card repos">
+                    <div class="stat-icon">
+                        <i class="fas fa-folder"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="totalRepos">0</h3>
+                        <p>Repositorios</p>
+                        <span class="stat-change" id="reposChange">--</span>
+                    </div>
+                </div>
+                
+                <div class="stat-card issues">
+                    <div class="stat-icon">
+                        <i class="fas fa-exclamation-circle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="totalIssues">0</h3>
+                        <p>Issues Abiertas</p>
+                        <span class="stat-change" id="issuesChange">--</span>
+                    </div>
+                </div>
+                
+                <div class="stat-card prs">
+                    <div class="stat-icon">
+                        <i class="fas fa-code-branch"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="totalPRs">0</h3>
+                        <p>Pull Requests</p>
+                        <span class="stat-change" id="prsChange">--</span>
+                    </div>
+                </div>
+                
+                <div class="stat-card activity">
+                    <div class="stat-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="activityScore">0</h3>
+                        <p>Score Actividad</p>
+                        <span class="stat-change" id="activityChange">--</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Repository Cards -->
+            <div class="repositories-grid" id="repositoriesGrid">
+                <!-- Cards de repositorios generadas dinámicamente -->
+            </div>
+            
+            <!-- Charts Section -->
+            <div class="charts-section">
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3>Actividad por Repositorio</h3>
+                        <div class="chart-controls">
+                            <select id="activityPeriod">
+                                <option value="7">Últimos 7 días</option>
+                                <option value="30" selected>Últimos 30 días</option>
+                                <option value="90">Últimos 90 días</option>
+                            </select>
+                        </div>
+                    </div>
+                    <canvas id="activityChart"></canvas>
+                </div>
+                
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3>Issues vs Pull Requests</h3>
+                        <div class="chart-legend" id="issuesPrsLegend"></div>
+                    </div>
+                    <canvas id="issuesPrsChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Repositories Tab -->
+        <section class="tab-content" id="repositories-tab">
+            <div class="repositories-header">
+                <h2>Repositorios del Ecosistema</h2>
+                
+                <div class="repositories-controls">
+                    <div class="search-container">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="repoSearch" placeholder="Buscar repositorios...">
+                        <button class="clear-search" id="clearSearch">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="filter-controls">
+                        <select id="sortBy">
+                            <option value="name">Ordenar por Nombre</option>
+                            <option value="stars">Ordenar por Estrellas</option>
+                            <option value="activity">Ordenar por Actividad</option>
+                            <option value="issues">Ordenar por Issues</option>
+                            <option value="updated">Ordenar por Actualización</option>
+                        </select>
+                        
+                        <select id="filterBy">
+                            <option value="all">Todos los Repos</option>
+                            <option value="active">Solo Activos</option>
+                            <option value="issues">Con Issues</option>
+                            <option value="prs">Con PRs</option>
+                            <option value="javascript">JavaScript</option>
+                            <option value="python">Python</option>
+                            <option value="typescript">TypeScript</option>
+                        </select>
+                        
+                        <button class="btn btn-secondary view-toggle" id="viewToggle">
+                            <i class="fas fa-th-large"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="repositories-list" id="repositoriesList">
+                <!-- Lista de repositorios generada dinámicamente -->
+            </div>
+            
+            <div class="repositories-pagination" id="repositoriesPagination">
+                <!-- Paginación generada dinámicamente -->
+            </div>
+        </section>
+
+        <!-- Analytics Tab -->
+        <section class="tab-content" id="analytics-tab">
+            <div class="analytics-header">
+                <h2>Analytics del Ecosistema</h2>
+                <p>Análisis comparativo y tendencias avanzadas</p>
+                
+                <div class="analytics-controls">
+                    <div class="period-selector">
+                        <button class="period-btn active" data-period="week">Semana</button>
+                        <button class="period-btn" data-period="month">Mes</button>
+                        <button class="period-btn" data-period="quarter">Trimestre</button>
+                        <button class="period-btn" data-period="year">Año</button>
+                    </div>
+                    
+                    <button class="btn btn-secondary" id="exportAnalytics">
+                        <i class="fas fa-download"></i>
+                        <span>Exportar</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="analytics-grid">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3>Comparación Multidimensional</h3>
+                        <div class="chart-info">
+                            <i class="fas fa-info-circle" title="Análisis comparativo de métricas clave"></i>
+                        </div>
+                    </div>
+                    <canvas id="radarChart"></canvas>
+                </div>
+                
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3>Tendencias Temporales</h3>
+                        <div class="chart-controls">
+                            <select id="timelineMetric">
+                                <option value="commits">Commits</option>
+                                <option value="issues">Issues</option>
+                                <option value="prs">Pull Requests</option>
+                                <option value="stars">Estrellas</option>
+                            </select>
+                        </div>
+                    </div>
+                    <canvas id="timelineChart"></canvas>
+                </div>
+                
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3>Distribución de Issues</h3>
+                        <div class="chart-legend" id="issuesLegend"></div>
+                    </div>
+                    <canvas id="issuesDistributionChart"></canvas>
+                </div>
+                
+                <div class="chart-card contributors-card">
+                    <div class="chart-header">
+                        <h3>Top Contribuidores</h3>
+                        <div class="contributors-period">
+                            <select id="contributorsPeriod">
+                                <option value="month">Este mes</option>
+                                <option value="quarter">Este trimestre</option>
+                                <option value="year">Este año</option>
+                                <option value="all">Todos los tiempos</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="contributorsList" class="contributors-list">
+                        <!-- Lista de contribuidores generada dinámicamente -->
+                    </div>
+                </div>
+                
+                <div class="chart-card metrics-card">
+                    <div class="chart-header">
+                        <h3>Métricas Específicas Yega</h3>
+                    </div>
+                    <div class="metrics-grid">
+                        <div class="metric-item">
+                            <span class="metric-label">API Coverage</span>
+                            <div class="metric-bar">
+                                <div class="metric-fill" style="width: 85%"></div>
+                            </div>
+                            <span class="metric-value">85%</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">Test Coverage</span>
+                            <div class="metric-bar">
+                                <div class="metric-fill" style="width: 92%"></div>
+                            </div>
+                            <span class="metric-value">92%</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">Documentation</span>
+                            <div class="metric-bar">
+                                <div class="metric-fill" style="width: 78%"></div>
+                            </div>
+                            <span class="metric-value">78%</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">Performance</span>
+                            <div class="metric-bar">
+                                <div class="metric-fill" style="width: 94%"></div>
+                            </div>
+                            <span class="metric-value">94%</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="chart-card languages-card">
+                    <div class="chart-header">
+                        <h3>Distribución de Lenguajes</h3>
+                    </div>
+                    <canvas id="languagesChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Timeline Tab -->
+        <section class="tab-content" id="timeline-tab">
+            <div class="timeline-header">
+                <h2>Timeline de Actividad</h2>
+                
+                <div class="timeline-controls">
+                    <div class="period-filters">
+                        <button class="filter-btn active" data-period="7">7 días</button>
+                        <button class="filter-btn" data-period="30">30 días</button>
+                        <button class="filter-btn" data-period="90">90 días</button>
+                        <button class="filter-btn" data-period="365">1 año</button>
+                    </div>
+                    
+                    <div class="type-filters">
+                        <button class="type-btn active" data-type="all">
+                            <i class="fas fa-globe"></i> Todos
+                        </button>
+                        <button class="type-btn" data-type="commits">
+                            <i class="fas fa-code-commit"></i> Commits
+                        </button>
+                        <button class="type-btn" data-type="issues">
+                            <i class="fas fa-exclamation-circle"></i> Issues
+                        </button>
+                        <button class="type-btn" data-type="prs">
+                            <i class="fas fa-code-branch"></i> PRs
+                        </button>
+                        <button class="type-btn" data-type="releases">
+                            <i class="fas fa-tag"></i> Releases
+                        </button>
+                    </div>
+                    
+                    <div class="export-controls">
+                        <button class="btn btn-secondary" id="exportJson">
+                            <i class="fas fa-download"></i> JSON
+                        </button>
+                        <button class="btn btn-secondary" id="exportCsv">
+                            <i class="fas fa-file-csv"></i> CSV
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="timeline-stats">
+                <div class="timeline-stat">
+                    <span class="stat-number" id="timelineCommits">0</span>
+                    <span class="stat-label">Commits</span>
+                </div>
+                <div class="timeline-stat">
+                    <span class="stat-number" id="timelineIssues">0</span>
+                    <span class="stat-label">Issues</span>
+                </div>
+                <div class="timeline-stat">
+                    <span class="stat-number" id="timelinePRs">0</span>
+                    <span class="stat-label">Pull Requests</span>
+                </div>
+                <div class="timeline-stat">
+                    <span class="stat-number" id="timelineContributors">0</span>
+                    <span class="stat-label">Contribuidores</span>
+                </div>
+            </div>
+            
+            <div class="timeline-container" id="timelineContainer">
+                <!-- Timeline items generados dinámicamente -->
+            </div>
+            
+            <div class="timeline-loading" id="timelineLoading">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Cargando más eventos...</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Repository Detail Modal -->
+    <div class="modal" id="repositoryModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <h2 id="modalRepoName">Repositorio</h2>
+                    <p id="modalRepoDescription">Descripción del repositorio</p>
+                </div>
+                <button class="modal-close" id="modalClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="modal-tabs">
+                <button class="modal-tab active" data-modal-tab="info">
+                    <i class="fas fa-info-circle"></i> Info
+                </button>
+                <button class="modal-tab" data-modal-tab="readme">
+                    <i class="fas fa-file-alt"></i> README
+                </button>
+                <button class="modal-tab" data-modal-tab="issues">
+                    <i class="fas fa-exclamation-circle"></i> Issues
+                </button>
+                <button class="modal-tab" data-modal-tab="prs">
+                    <i class="fas fa-code-branch"></i> PRs
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                <!-- Pestaña Info -->
+                <div class="modal-tab-content active" id="modal-info">
+                    <div class="repo-stats">
+                        <div class="repo-stat">
+                            <i class="fas fa-star"></i>
+                            <span id="modalStars">0</span> estrellas
+                        </div>
+                        <div class="repo-stat">
+                            <i class="fas fa-code-branch"></i>
+                            <span id="modalForks">0</span> forks
+                        </div>
+                        <div class="repo-stat">
+                            <i class="fas fa-code"></i>
+                            <span id="modalLanguage">--</span>
+                        </div>
+                        <div class="repo-stat">
+                            <i class="fas fa-clock"></i>
+                            <span id="modalUpdated">--</span>
+                        </div>
+                    </div>
+                    
+                    <div class="repo-links">
+                        <a id="modalGithubLink" class="btn btn-primary" target="_blank">
+                            <i class="fab fa-github"></i> Ver en GitHub
+                        </a>
+                        <a id="modalWebsiteLink" class="btn btn-secondary" target="_blank" style="display: none;">
+                            <i class="fas fa-external-link-alt"></i> Sitio Web
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Pestaña README -->
+                <div class="modal-tab-content" id="modal-readme">
+                    <div class="readme-container">
+                        <div class="readme-loading">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <p>Cargando README...</p>
+                        </div>
+                        <div class="readme-content" id="readmeContent">
+                            <!-- Contenido del README renderizado -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Pestaña Issues -->
+                <div class="modal-tab-content" id="modal-issues">
+                    <div class="issues-header">
+                        <div class="issues-filters">
+                            <select id="issuesFilter">
+                                <option value="all">Todas las issues</option>
+                                <option value="open">Abiertas</option>
+                                <option value="closed">Cerradas</option>
+                                <option value="bug">Bugs</option>
+                                <option value="enhancement">Mejoras</option>
+                            </select>
+                            
+                            <select id="issuesSort">
+                                <option value="created">Fecha de creación</option>
+                                <option value="updated">Última actualización</option>
+                                <option value="comments">Más comentarios</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="issues-list" id="issuesList">
+                        <!-- Lista de issues generada dinámicamente -->
+                    </div>
+                </div>
+                
+                <!-- Pestaña PRs -->
+                <div class="modal-tab-content" id="modal-prs">
+                    <div class="prs-header">
+                        <div class="prs-filters">
+                            <select id="prsFilter">
+                                <option value="all">Todos los PRs</option>
+                                <option value="open">Abiertos</option>
+                                <option value="closed">Cerrados</option>
+                                <option value="merged">Mergeados</option>
+                            </select>
+                            
+                            <select id="prsSort">
+                                <option value="created">Fecha de creación</option>
+                                <option value="updated">Última actualización</option>
+                                <option value="additions">Más cambios</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="prs-list" id="prsList">
+                        <!-- Lista de PRs generada dinámicamente -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Cargando datos...</p>
+        </div>
+    </div>
+
+    <!-- Notifications Container -->
+    <div class="notifications-container" id="notificationsContainer">
+        <!-- Notificaciones generadas dinámicamente -->
+    </div>
+
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js')
+                .then(registration => console.log('SW registered:', registration))
+                .catch(error => console.log('SW registration failed:', error));
+        }
+    </script>
+    
+    <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script src="js/charts.js"></script>
+    <script src="js/timeline.js"></script>
+    
+    <script>
+        // Inicialización del dashboard
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const dashboard = new YegaDashboard();
+                await dashboard.init();
+                window.yegaDashboard = dashboard;
+                console.log('Dashboard Yega inicializado correctamente');
+            } catch (error) {
+                console.error('Error inicializando dashboard:', error);
+            }
+        });
+    </script>
+</body>
+</html>

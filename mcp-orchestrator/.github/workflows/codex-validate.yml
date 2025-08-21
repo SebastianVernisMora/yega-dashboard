@@ -1,0 +1,21 @@
+
+name: codex-validate
+
+on:
+  pull_request:
+    branches: [ dev, main ]
+  push:
+    branches: [ dev ]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Codex Validate
+        run: |
+          chmod +x ./scripts/codex-validate.sh || true
+          ./scripts/codex-validate.sh

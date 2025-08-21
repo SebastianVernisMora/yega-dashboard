@@ -1,0 +1,354 @@
+# =============================================================================
+# Schema de Prisma - Dashboard Yega
+# =============================================================================
+# Configuración de base de datos usando Prisma ORM
+# =============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+# =============================================================================
+# Modelo de Usuario
+# =============================================================================
+model User {
+  id              Int      @id @default(autoincrement())
+  username        String   @unique @db.VarChar(255)
+  email           String   @unique @db.VarChar(255)
+  githubId        String?  @unique @map("github_id") @db.VarChar(255)
+  avatarUrl       String?  @map("avatar_url") @db.Text
+  accessToken     String?  @map("access_token") @db.Text
+  refreshToken    String?  @map("refresh_token") @db.Text
+  name            String?  @db.VarChar(255)
+  bio             String?  @db.Text
+  location        String?  @db.VarChar(255)
+  company         String?  @db.VarChar(255)
+  blog            String?  @db.VarChar(255)
+  publicRepos     Int      @default(0) @map("public_repos")
+  publicGists     Int      @default(0) @map("public_gists")
+  followers       Int      @default(0)
+  following       Int      @default(0)
+  isActive        Boolean  @default(true) @map("is_active")
+  lastSyncAt      DateTime? @map("last_sync_at")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+  
+  // Relaciones
+  repositories    Repository[]
+  commits         Commit[]
+  issues          Issue[]
+  pullRequests    PullRequest[]
+  activities      Activity[]
+  apiTokens       ApiToken[]
+  sessions        Session[]
+  
+  @@map("users")
+  @@index([username])
+  @@index([email])
+  @@index([githubId])
+  @@index([isActive])
+  @@index([lastSyncAt])
+}
+
+# =============================================================================
+# Modelo de Repositorio
+# =============================================================================
+model Repository {
+  id              Int      @id @default(autoincrement())
+  githubId        String   @unique @map("github_id") @db.VarChar(255)
+  name            String   @db.VarChar(255)
+  fullName        String   @map("full_name") @db.VarChar(255)
+  description     String?  @db.Text
+  private         Boolean  @default(false)
+  fork            Boolean  @default(false)
+  starsCount      Int      @default(0) @map("stars_count")
+  forksCount      Int      @default(0) @map("forks_count")
+  watchersCount   Int      @default(0) @map("watchers_count")
+  language        String?  @db.VarChar(100)
+  size            Int      @default(0)
+  defaultBranch   String   @default("main") @map("default_branch") @db.VarChar(100)
+  topics          Json?
+  license         Json?
+  hasIssues       Boolean  @default(true) @map("has_issues")
+  hasProjects     Boolean  @default(true) @map("has_projects")
+  hasWiki         Boolean  @default(true) @map("has_wiki")
+  hasPages        Boolean  @default(false) @map("has_pages")
+  archived        Boolean  @default(false)
+  disabled        Boolean  @default(false)
+  cloneUrl        String?  @map("clone_url") @db.Text
+  sshUrl          String?  @map("ssh_url") @db.Text
+  htmlUrl         String?  @map("html_url") @db.Text
+  homepage        String?  @db.VarChar(500)
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+  pushedAt        DateTime? @map("pushed_at")
+  
+  // Relaciones
+  userId          Int      @map("user_id")
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  commits         Commit[]
+  issues          Issue[]
+  pullRequests    PullRequest[]
+  activities      Activity[]
+  
+  @@map("repositories")
+  @@index([githubId])
+  @@index([userId])
+  @@index([name])
+  @@index([language])
+  @@index([private])
+  @@index([fork])
+  @@index([starsCount])
+  @@index([updatedAt])
+  @@index([pushedAt])
+  @@index([userId, updatedAt])
+}
+
+# =============================================================================
+# Modelo de Commit
+# =============================================================================
+model Commit {
+  id              Int      @id @default(autoincrement())
+  sha             String   @unique @db.VarChar(40)
+  message         String?  @db.Text
+  authorName      String?  @map("author_name") @db.VarChar(255)
+  authorEmail     String?  @map("author_email") @db.VarChar(255)
+  authorDate      DateTime? @map("author_date")
+  committerName   String?  @map("committer_name") @db.VarChar(255)
+  committerEmail  String?  @map("committer_email") @db.VarChar(255)
+  committerDate   DateTime? @map("committer_date")
+  additions       Int      @default(0)
+  deletions       Int      @default(0)
+  changedFiles    Int      @default(0) @map("changed_files")
+  url             String?  @db.Text
+  createdAt       DateTime @default(now()) @map("created_at")
+  
+  // Relaciones
+  repositoryId    Int      @map("repository_id")
+  repository      Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  
+  userId          Int      @map("user_id")
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("commits")
+  @@index([sha])
+  @@index([repositoryId])
+  @@index([userId])
+  @@index([authorEmail])
+  @@index([authorDate])
+  @@index([committerDate])
+  @@index([repositoryId, committerDate])
+}
+
+# =============================================================================
+# Modelo de Issue
+# =============================================================================
+model Issue {
+  id              Int      @id @default(autoincrement())
+  githubId        Int      @unique @map("github_id")
+  number          Int
+  title           String   @db.VarChar(500)
+  body            String?  @db.Text
+  state           IssueState @default(OPEN)
+  labels          Json?
+  assignees       Json?
+  milestone       Json?
+  commentsCount   Int      @default(0) @map("comments_count")
+  authorUsername  String?  @map("author_username") @db.VarChar(255)
+  authorAvatarUrl String?  @map("author_avatar_url") @db.Text
+  htmlUrl         String?  @map("html_url") @db.Text
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+  closedAt        DateTime? @map("closed_at")
+  
+  // Relaciones
+  repositoryId    Int      @map("repository_id")
+  repository      Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  
+  userId          Int      @map("user_id")
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("issues")
+  @@index([githubId])
+  @@index([repositoryId])
+  @@index([userId])
+  @@index([number])
+  @@index([state])
+  @@index([createdAt])
+  @@index([updatedAt])
+  @@index([repositoryId, state])
+}
+
+enum IssueState {
+  OPEN
+  CLOSED
+  
+  @@map("issue_state")
+}
+
+# =============================================================================
+# Modelo de Pull Request
+# =============================================================================
+model PullRequest {
+  id                    Int      @id @default(autoincrement())
+  githubId              Int      @unique @map("github_id")
+  number                Int
+  title                 String   @db.VarChar(500)
+  body                  String?  @db.Text
+  state                 PullRequestState @default(OPEN)
+  draft                 Boolean  @default(false)
+  mergeable             Boolean  @default(true)
+  merged                Boolean  @default(false)
+  mergeCommitSha        String?  @map("merge_commit_sha") @db.VarChar(40)
+  baseRef               String?  @map("base_ref") @db.VarChar(255)
+  headRef               String?  @map("head_ref") @db.VarChar(255)
+  additions             Int      @default(0)
+  deletions             Int      @default(0)
+  changedFiles          Int      @default(0) @map("changed_files")
+  commitsCount          Int      @default(0) @map("commits_count")
+  commentsCount         Int      @default(0) @map("comments_count")
+  reviewCommentsCount   Int      @default(0) @map("review_comments_count")
+  authorUsername        String?  @map("author_username") @db.VarChar(255)
+  authorAvatarUrl       String?  @map("author_avatar_url") @db.Text
+  htmlUrl               String?  @map("html_url") @db.Text
+  diffUrl               String?  @map("diff_url") @db.Text
+  patchUrl              String?  @map("patch_url") @db.Text
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+  closedAt              DateTime? @map("closed_at")
+  mergedAt              DateTime? @map("merged_at")
+  
+  // Relaciones
+  repositoryId          Int      @map("repository_id")
+  repository            Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  
+  userId                Int      @map("user_id")
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("pull_requests")
+  @@index([githubId])
+  @@index([repositoryId])
+  @@index([userId])
+  @@index([number])
+  @@index([state])
+  @@index([merged])
+  @@index([createdAt])
+  @@index([updatedAt])
+  @@index([repositoryId, state])
+}
+
+enum PullRequestState {
+  OPEN
+  CLOSED
+  MERGED
+  
+  @@map("pull_request_state")
+}
+
+# =============================================================================
+# Modelo de Actividad
+# =============================================================================
+model Activity {
+  id             Int      @id @default(autoincrement())
+  type           String   @db.VarChar(50)
+  action         String   @db.VarChar(50)
+  description    String?  @db.Text
+  metadata       Json?
+  repositoryName String?  @map("repository_name") @db.VarChar(255)
+  targetType     String?  @map("target_type") @db.VarChar(50)
+  targetId       String?  @map("target_id") @db.VarChar(255)
+  createdAt      DateTime @default(now()) @map("created_at")
+  
+  // Relaciones
+  userId         Int      @map("user_id")
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  repositoryId   Int?     @map("repository_id")
+  repository     Repository? @relation(fields: [repositoryId], references: [id], onDelete: SetNull)
+  
+  @@map("activities")
+  @@index([userId])
+  @@index([repositoryId])
+  @@index([type])
+  @@index([action])
+  @@index([targetType, targetId])
+  @@index([createdAt])
+  @@index([userId, createdAt])
+}
+
+# =============================================================================
+# Modelo de Sesión
+# =============================================================================
+model Session {
+  id           String   @id @db.VarChar(255)
+  userId       Int?     @map("user_id")
+  ipAddress    String?  @map("ip_address") @db.VarChar(45)
+  userAgent    String?  @map("user_agent") @db.Text
+  payload      String   @db.LongText
+  lastActivity Int      @map("last_activity")
+  
+  // Relaciones
+  user         User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("sessions")
+  @@index([userId])
+  @@index([lastActivity])
+}
+
+# =============================================================================
+# Modelo de Configuraciones
+# =============================================================================
+model Setting {
+  id          Int      @id @default(autoincrement())
+  keyName     String   @unique @map("key_name") @db.VarChar(255)
+  value       String?  @db.Text
+  type        SettingType @default(STRING)
+  description String?  @db.Text
+  isPublic    Boolean  @default(false) @map("is_public")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  
+  @@map("settings")
+  @@index([keyName])
+  @@index([isPublic])
+}
+
+enum SettingType {
+  STRING
+  INTEGER
+  BOOLEAN
+  JSON
+  
+  @@map("setting_type")
+}
+
+# =============================================================================
+# Modelo de Tokens de API
+# =============================================================================
+model ApiToken {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(255)
+  token       String   @unique @db.VarChar(255)
+  abilities   Json?
+  lastUsedAt  DateTime? @map("last_used_at")
+  expiresAt   DateTime? @map("expires_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  
+  // Relaciones
+  userId      Int      @map("user_id")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("api_tokens")
+  @@index([token])
+  @@index([userId])
+  @@index([lastUsedAt])
+  @@index([expiresAt])
+}

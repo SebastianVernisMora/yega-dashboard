@@ -1,0 +1,501 @@
+// Schema de Prisma para Dashboard de Repositorios Yega
+// Generado para análisis del ecosistema Yega
+// Versión optimizada con índices y relaciones completas
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Modelo principal de repositorios
+model Repository {
+  id                Int      @id @default(autoincrement())
+  githubId          Int      @unique
+  name              String
+  fullName          String   @unique // formato: owner/repo
+  owner             String
+  description       String?
+  private           Boolean  @default(false)
+  fork              Boolean  @default(false)
+  
+  // URLs y metadata de GitHub
+  htmlUrl           String
+  cloneUrl          String
+  gitUrl            String
+  sshUrl            String
+  homepage          String?
+  
+  // Estadísticas principales
+  stargazersCount   Int      @default(0)
+  watchersCount     Int      @default(0)
+  forksCount        Int      @default(0)
+  openIssuesCount   Int      @default(0)
+  subscribersCount  Int      @default(0)
+  networkCount      Int      @default(0)
+  size              Int      @default(0) // en KB
+  
+  // Información técnica
+  defaultBranch     String   @default("main")
+  language          String?
+  topics            String[] // array de topics/tags
+  license           String?
+  
+  // Timestamps de GitHub
+  createdAt         DateTime
+  updatedAt         DateTime
+  pushedAt          DateTime?
+  
+  // Análisis del ecosistema
+  projectType       ProjectType
+  ecoSystemRole     String? // rol dentro del ecosistema Yega
+  dependencies      String[] // dependencias principales
+  technicalStack    String[] // stack tecnológico
+  
+  // Flags de análisis
+  isActive          Boolean  @default(true)
+  hasTests          Boolean  @default(false)
+  hasDocumentation  Boolean  @default(false)
+  hasCI             Boolean  @default(false)
+  
+  // Metadata personalizada
+  lastAnalysisAt    DateTime?
+  healthScore       Float?   // score de salud del repo (0-100)
+  
+  // Timestamps del sistema
+  syncedAt          DateTime @default(now())
+  createdAtLocal    DateTime @default(now())
+  updatedAtLocal    DateTime @updatedAt
+  
+  // Relaciones
+  issues            Issue[]
+  pullRequests      PullRequest[]
+  commits           Commit[]
+  contributors      RepositoryContributor[]
+  readmeContent     ReadmeContent?
+  
+  // Índices para optimización
+  @@index([owner])
+  @@index([projectType])
+  @@index([language])
+  @@index([isActive])
+  @@index([updatedAt])
+  @@index([pushedAt])
+  @@index([stargazersCount])
+  @@index([healthScore])
+  @@map("repositories")
+}
+
+// Modelo de issues
+model Issue {
+  id                Int      @id @default(autoincrement())
+  githubId          Int      @unique
+  number            Int
+  title             String
+  body              String?
+  state             IssueState
+  
+  // Referencias
+  repositoryId      Int
+  repository        Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  
+  // Usuario que creó el issue
+  authorLogin       String
+  authorAvatarUrl   String?
+  authorType        String?
+  
+  // Usuario asignado (si aplica)
+  assigneeLogin     String?
+  assigneeAvatarUrl String?
+  
+  // Metadata
+  labels            String[] // array de labels
+  milestone         String?
+  locked            Boolean  @default(false)
+  
+  // URLs
+  htmlUrl           String
+  apiUrl            String
+  
+  // Análisis
+  priority          IssuePriority?
+  category          String?
+  estimatedHours    Float?
+  isEcosystemIssue  Boolean  @default(false)
+  
+  // Timestamps
+  createdAt         DateTime
+  updatedAt         DateTime
+  closedAt          DateTime?
+  
+  // Sistema
+  syncedAt          DateTime @default(now())
+  createdAtLocal    DateTime @default(now())
+  updatedAtLocal    DateTime @updatedAt
+  
+  // Índices para optimización
+  @@unique([repositoryId, number])
+  @@index([repositoryId])
+  @@index([state])
+  @@index([authorLogin])
+  @@index([priority])
+  @@index([createdAt])
+  @@index([updatedAt])
+  @@index([isEcosystemIssue])
+  @@map("issues")
+}
+
+// Modelo de pull requests
+model PullRequest {
+  id                Int      @id @default(autoincrement())
+  githubId          Int      @unique
+  number            Int
+  title             String
+  body              String?
+  state             PullRequestState
+  
+  // Referencias
+  repositoryId      Int
+  repository        Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  
+  // Branches
+  headBranch        String
+  baseBranch        String
+  headSha           String
+  baseSha           String
+  
+  // Usuario autor
+  authorLogin       String
+  authorAvatarUrl   String?
+  authorType        String?
+  
+  // Metadata
+  draft             Boolean  @default(false)
+  mergeable         Boolean?
+  mergeableState    String?
+  merged            Boolean  @default(false)
+  mergedBy          String?
+  mergeCommitSha    String?
+  
+  // Estadísticas
+  additions         Int      @default(0)
+  deletions         Int      @default(0)
+  changedFiles      Int      @default(0)
+  commits           Int      @default(0)
+  
+  // URLs
+  htmlUrl           String
+  diffUrl           String
+  patchUrl          String
+  
+  // Análisis
+  complexity        PullRequestComplexity?
+  impactLevel       String?
+  reviewStatus      String?
+  isFeature         Boolean  @default(false)
+  isBugfix          Boolean  @default(false)
+  isHotfix          Boolean  @default(false)
+  
+  // Timestamps
+  createdAt         DateTime
+  updatedAt         DateTime
+  closedAt          DateTime?
+  mergedAt          DateTime?
+  
+  // Sistema
+  syncedAt          DateTime @default(now())
+  createdAtLocal    DateTime @default(now())
+  updatedAtLocal    DateTime @updatedAt
+  
+  // Índices para optimización
+  @@unique([repositoryId, number])
+  @@index([repositoryId])
+  @@index([state])
+  @@index([authorLogin])
+  @@index([baseBranch])
+  @@index([headBranch])
+  @@index([merged])
+  @@index([draft])
+  @@index([complexity])
+  @@index([createdAt])
+  @@index([mergedAt])
+  @@map("pull_requests")
+}
+
+// Modelo de commits
+model Commit {
+  id                Int      @id @default(autoincrement())
+  sha               String   @unique
+  message           String
+  
+  // Referencias
+  repositoryId      Int
+  repository        Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  
+  // Autor del commit
+  authorName        String
+  authorEmail       String
+  authorLogin       String?
+  authorAvatarUrl   String?
+  
+  // Committer (puede ser diferente al autor)
+  committerName     String
+  committerEmail    String
+  committerLogin    String?
+  
+  // Metadata del commit
+  treeId            String
+  parentShas        String[] // array de SHAs de commits padre
+  
+  // Estadísticas
+  additions         Int      @default(0)
+  deletions         Int      @default(0)
+  total             Int      @default(0)
+  filesChanged      String[] // archivos modificados
+  
+  // URLs
+  htmlUrl           String
+  apiUrl            String
+  
+  // Análisis
+  commitType        CommitType?
+  impactScope       String?
+  isBreaking        Boolean  @default(false)
+  isMergeCommit     Boolean  @default(false)
+  isRevert          Boolean  @default(false)
+  
+  // Timestamps
+  authorDate        DateTime
+  committerDate     DateTime
+  
+  // Sistema
+  syncedAt          DateTime @default(now())
+  createdAtLocal    DateTime @default(now())
+  updatedAtLocal    DateTime @updatedAt
+  
+  // Índices para optimización
+  @@index([repositoryId])
+  @@index([authorLogin])
+  @@index([authorEmail])
+  @@index([commitType])
+  @@index([authorDate])
+  @@index([committerDate])
+  @@index([isBreaking])
+  @@index([isMergeCommit])
+  @@map("commits")
+}
+
+// Modelo de contribuidores
+model Contributor {
+  id                Int      @id @default(autoincrement())
+  githubId          Int      @unique
+  login             String   @unique
+  name              String?
+  email             String?
+  
+  // Profile info
+  avatarUrl         String?
+  gravatarId        String?
+  bio               String?
+  company           String?
+  location          String?
+  blog              String?
+  twitterUsername   String?
+  
+  // GitHub URLs
+  htmlUrl           String
+  followersUrl      String
+  followingUrl      String
+  reposUrl          String
+  
+  // Estadísticas públicas de GitHub
+  publicRepos       Int      @default(0)
+  publicGists       Int      @default(0)
+  followers         Int      @default(0)
+  following         Int      @default(0)
+  
+  // Análisis del ecosistema
+  ecoSystemRole     String?
+  expertiseAreas    String[] // áreas de expertise
+  mainLanguages     String[] // lenguajes principales
+  isCore            Boolean  @default(false)
+  
+  // Timestamps
+  githubCreatedAt   DateTime?
+  githubUpdatedAt   DateTime?
+  
+  // Sistema
+  syncedAt          DateTime @default(now())
+  createdAtLocal    DateTime @default(now())
+  updatedAtLocal    DateTime @updatedAt
+  
+  // Relaciones
+  repositories      RepositoryContributor[]
+  
+  // Índices para optimización
+  @@index([login])
+  @@index([email])
+  @@index([company])
+  @@index([location])
+  @@index([isCore])
+  @@index([followers])
+  @@index([publicRepos])
+  @@map("contributors")
+}
+
+// Tabla intermedia para relación many-to-many entre Repository y Contributor
+model RepositoryContributor {
+  id                Int      @id @default(autoincrement())
+  
+  // Referencias
+  repositoryId      Int
+  contributorId     Int
+  repository        Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  contributor       Contributor @relation(fields: [contributorId], references: [id], onDelete: Cascade)
+  
+  // Estadísticas de contribución
+  contributions     Int      @default(0)
+  commitsCount      Int      @default(0)
+  issuesCount       Int      @default(0)
+  pullRequestsCount Int      @default(0)
+  
+  // Análisis
+  contributionType  ContributionType
+  isOwner           Boolean  @default(false)
+  isMaintainer      Boolean  @default(false)
+  firstContribution DateTime?
+  lastContribution  DateTime?
+  
+  // Sistema
+  syncedAt          DateTime @default(now())
+  createdAtLocal    DateTime @default(now())
+  updatedAtLocal    DateTime @updatedAt
+  
+  // Índices para optimización
+  @@unique([repositoryId, contributorId])
+  @@index([repositoryId])
+  @@index([contributorId])
+  @@index([contributionType])
+  @@index([isOwner])
+  @@index([isMaintainer])
+  @@index([contributions])
+  @@index([lastContribution])
+  @@map("repository_contributors")
+}
+
+// Modelo para contenido de README
+model ReadmeContent {
+  id                Int      @id @default(autoincrement())
+  
+  // Referencia única al repositorio
+  repositoryId      Int      @unique
+  repository        Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  
+  // Contenido
+  content           String   // contenido completo del README
+  contentMd         String?  // contenido en markdown si es diferente
+  htmlUrl           String   // URL al README en GitHub
+  
+  // Metadata del archivo
+  fileName          String   @default("README.md")
+  filePath          String   @default("/README.md")
+  fileSize          Int      @default(0)
+  fileSha           String
+  
+  // Análisis del contenido
+  hasInstallation   Boolean  @default(false)
+  hasUsage          Boolean  @default(false)
+  hasExamples       Boolean  @default(false)
+  hasAPI            Boolean  @default(false)
+  hasContributing   Boolean  @default(false)
+  hasLicense        Boolean  @default(false)
+  hasBadges         Boolean  @default(false)
+  
+  // Métricas de calidad
+  wordCount         Int      @default(0)
+  readabilityScore  Float?   // score de legibilidad
+  completenessScore Float?   // score de completitud (0-100)
+  
+  // Links encontrados
+  externalLinks     String[] // links externos encontrados
+  internalLinks     String[] // links internos del proyecto
+  
+  // Timestamps
+  lastModified      DateTime
+  
+  // Sistema
+  syncedAt          DateTime @default(now())
+  createdAtLocal    DateTime @default(now())
+  updatedAtLocal    DateTime @updatedAt
+  
+  // Índices para optimización
+  @@index([repositoryId])
+  @@index([fileName])
+  @@index([fileSize])
+  @@index([wordCount])
+  @@index([completenessScore])
+  @@index([lastModified])
+  @@map("readme_contents")
+}
+
+// Enums para types específicos
+enum ProjectType {
+  CORE_SYSTEM     // Yega-Ecosistema
+  API             // Yega-API
+  WEB_APP         // Yega-Tienda
+  MOBILE_APP      // Yega-Repartidor, Yega-Cliente
+  LIBRARY
+  TOOL
+  DOCUMENTATION
+  OTHER
+}
+
+enum IssueState {
+  OPEN
+  CLOSED
+}
+
+enum IssuePriority {
+  CRITICAL
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum PullRequestState {
+  OPEN
+  CLOSED
+  MERGED
+}
+
+enum PullRequestComplexity {
+  SIMPLE
+  MODERATE
+  COMPLEX
+  CRITICAL
+}
+
+enum CommitType {
+  FEATURE
+  BUGFIX
+  HOTFIX
+  REFACTOR
+  DOCS
+  STYLE
+  TEST
+  CHORE
+  MERGE
+  REVERT
+  INITIAL
+}
+
+enum ContributionType {
+  OWNER
+  MAINTAINER
+  CONTRIBUTOR
+  COLLABORATOR
+  OCCASIONAL
+}

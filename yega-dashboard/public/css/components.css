@@ -1,0 +1,368 @@
+/* Estilos adicionales para componentes específicos */
+
+/* Timeline de commits con efectos neón */
+.commit-timeline {
+    position: relative;
+    padding: 2rem 0;
+}
+
+.commit-timeline::before {
+    content: '';
+    position: absolute;
+    left: 30px;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: linear-gradient(
+        to bottom,
+        var(--neon-cyan) 0%,
+        var(--neon-pink) 50%,
+        var(--neon-purple) 100%
+    );
+    box-shadow: 0 0 10px var(--neon-cyan);
+}
+
+.commit-item {
+    position: relative;
+    margin-left: 60px;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: rgba(10, 10, 10, 0.8);
+    border-radius: 12px;
+    border: 1px solid var(--neon-cyan);
+    backdrop-filter: blur(10px);
+}
+
+.commit-item::before {
+    content: '';
+    position: absolute;
+    left: -45px;
+    top: 1.5rem;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: var(--neon-cyan);
+    box-shadow: 0 0 15px var(--neon-cyan);
+    border: 3px solid var(--bg-black);
+}
+
+.commit-item:nth-child(2n)::before {
+    background: var(--neon-pink);
+    box-shadow: 0 0 15px var(--neon-pink);
+}
+
+.commit-item:nth-child(3n)::before {
+    background: var(--neon-purple);
+    box-shadow: 0 0 15px var(--neon-purple);
+}
+
+.commit-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.commit-hash {
+    font-family: 'Courier New', monospace;
+    color: var(--neon-green);
+    font-size: 0.9rem;
+    background: rgba(50, 255, 50, 0.1);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    border: 1px solid var(--neon-green);
+}
+
+.commit-message {
+    color: var(--text-white);
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+}
+
+.commit-author {
+    color: var(--neon-cyan);
+    font-size: 0.9rem;
+}
+
+.commit-date {
+    color: var(--text-gray);
+    font-size: 0.8rem;
+}
+
+/* Gráficos personalizados con Chart.js */
+.chart-container {
+    position: relative;
+    background: rgba(10, 10, 10, 0.8);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 2px solid var(--neon-purple);
+    box-shadow: 0 0 20px var(--neon-purple);
+    backdrop-filter: blur(10px);
+}
+
+.chart-title {
+    text-align: center;
+    margin-bottom: 1rem;
+    color: var(--neon-purple);
+    font-size: 1.2rem;
+    text-shadow: 0 0 10px var(--neon-purple);
+}
+
+/* Efectos de notificación neón */
+.notification {
+    position: fixed;
+    top: 100px;
+    right: 20px;
+    background: rgba(10, 10, 10, 0.95);
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    border: 2px solid;
+    box-shadow: 0 0 20px currentColor;
+    backdrop-filter: blur(10px);
+    z-index: 3000;
+    transform: translateX(400px);
+    transition: transform 0.3s ease;
+}
+
+.notification.show {
+    transform: translateX(0);
+}
+
+.notification.success {
+    border-color: var(--neon-green);
+    color: var(--neon-green);
+}
+
+.notification.error {
+    border-color: var(--neon-pink);
+    color: var(--neon-pink);
+}
+
+.notification.info {
+    border-color: var(--neon-cyan);
+    color: var(--neon-cyan);
+}
+
+.notification.warning {
+    border-color: var(--neon-purple);
+    color: var(--neon-purple);
+}
+
+/* Status badges con efectos neón */
+.status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: 1px solid;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.status-active {
+    background: rgba(50, 255, 50, 0.2);
+    color: var(--neon-green);
+    border-color: var(--neon-green);
+    box-shadow: 0 0 10px var(--neon-green);
+}
+
+.status-inactive {
+    background: rgba(255, 0, 127, 0.2);
+    color: var(--neon-pink);
+    border-color: var(--neon-pink);
+    box-shadow: 0 0 10px var(--neon-pink);
+}
+
+.status-archived {
+    background: rgba(138, 43, 226, 0.2);
+    color: var(--neon-purple);
+    border-color: var(--neon-purple);
+    box-shadow: 0 0 10px var(--neon-purple);
+}
+
+/* Loading states con efectos neón */
+.skeleton-loader {
+    background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.05) 25%,
+        rgba(0, 255, 255, 0.1) 50%,
+        rgba(255, 255, 255, 0.05) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+    border-radius: 8px;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+/* Efectos de código con sintaxis neón */
+.code-block {
+    background: rgba(0, 0, 0, 0.8);
+    border: 2px solid var(--neon-green);
+    border-radius: 8px;
+    padding: 1rem;
+    font-family: 'Courier New', monospace;
+    color: var(--neon-green);
+    overflow-x: auto;
+    position: relative;
+}
+
+.code-block::before {
+    content: 'CODE';
+    position: absolute;
+    top: -10px;
+    left: 10px;
+    background: var(--bg-black);
+    color: var(--neon-green);
+    padding: 0 0.5rem;
+    font-size: 0.7rem;
+    font-weight: bold;
+}
+
+.code-keyword {
+    color: var(--neon-cyan);
+}
+
+.code-string {
+    color: var(--neon-pink);
+}
+
+.code-comment {
+    color: var(--text-gray);
+    font-style: italic;
+}
+
+/* Tooltips con efectos neón */
+.tooltip {
+    position: relative;
+    cursor: help;
+}
+
+.tooltip::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.9);
+    color: var(--neon-cyan);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--neon-cyan);
+    box-shadow: 0 0 15px var(--neon-cyan);
+    font-size: 0.8rem;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.tooltip:hover::after {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(-5px);
+}
+
+/* Efectos de búsqueda avanzada */
+.search-suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: rgba(10, 10, 10, 0.95);
+    border: 2px solid var(--neon-cyan);
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    backdrop-filter: blur(10px);
+    z-index: 1000;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.suggestion-item {
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+}
+
+.suggestion-item:hover {
+    background: rgba(0, 255, 255, 0.1);
+    color: var(--neon-cyan);
+}
+
+.suggestion-item:last-child {
+    border-bottom: none;
+}
+
+/* Animaciones de entrada para cards */
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.repo-card {
+    animation: slideInUp 0.6s ease forwards;
+}
+
+.repo-card:nth-child(2) { animation-delay: 0.1s; }
+.repo-card:nth-child(3) { animation-delay: 0.2s; }
+.repo-card:nth-child(4) { animation-delay: 0.3s; }
+.repo-card:nth-child(5) { animation-delay: 0.4s; }
+.repo-card:nth-child(6) { animation-delay: 0.5s; }
+
+/* Efectos de focus mejorados */
+*:focus {
+    outline: 2px solid var(--neon-cyan);
+    outline-offset: 2px;
+    box-shadow: 0 0 10px var(--neon-cyan);
+}
+
+/* Dark theme específico para Chart.js */
+.chartjs-tooltip {
+    background: rgba(10, 10, 10, 0.95) !important;
+    border: 1px solid var(--neon-cyan) !important;
+    border-radius: 8px !important;
+    color: var(--text-white) !important;
+}
+
+/* Efectos adicionales para interactividad */
+.interactive-element {
+    position: relative;
+    overflow: hidden;
+}
+
+.interactive-element::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: radial-gradient(circle, rgba(0, 255, 255, 0.3) 0%, transparent 70%);
+    transition: all 0.6s ease;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.interactive-element:active::before {
+    width: 300px;
+    height: 300px;
+}
