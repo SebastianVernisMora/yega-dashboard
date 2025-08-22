@@ -21,7 +21,7 @@ class IssueController
     /**
      * Lista issues de un repositorio con filtros
      */
-    public function index(Request $request, string $repo): JsonResponse
+    private function validateRepository(string $repo): bool
     {
         try {
             $owner = $_ENV['GITHUB_OWNER'] ?? 'yega';

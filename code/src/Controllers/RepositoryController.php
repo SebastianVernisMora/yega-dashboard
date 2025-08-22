@@ -21,7 +21,7 @@ class RepositoryController
     /**
      * Lista todos los repositorios Yega
      */
-    public function index(Request $request): JsonResponse
+    private function validateRepository(string $repo): bool
     {
         try {
             $repositories = $this->githubService->getYegaRepositories();
