@@ -1,9 +1,5 @@
 
-Built by https://www.blackbox.ai
 
----
-
-```markdown
 # Project Name: Overlap Analysis
 
 ## Project Overview
@@ -14,7 +10,7 @@ To get started with the Overlap Analysis project, you'll need to clone the repos
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/overlap-analysis.git
+   git clone https://github.com/sebastianvernismora/yega-dashboard.git
    ```
 
 2. Navigate into your project directory:
@@ -76,5 +72,3 @@ This structure helps maintain a clear organization, separating controllers, serv
 ## License
 This project is licensed under the MIT License. See the LICENSE file for more information.
 ```
-
-Make sure to replace `https://github.com/yourusername/overlap-analysis.git` with the actual repository URL and adjust any project details as necessary.
